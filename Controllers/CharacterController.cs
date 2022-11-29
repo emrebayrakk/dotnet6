@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dotnet6.Services.CharacterService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet6.Controllers
@@ -10,17 +11,23 @@ namespace Dotnet6.Controllers
     [Route("api/[controller]")]
     public class CharacterController : ControllerBase
     {
-        private static List<Character> characters = new List<Character>{
-            new Character(),
-            new Character { Id=1, Name = "Bayrak", }
-        };
+        private readonly ICharacterService _character;
+        public CharacterController(ICharacterService character)
+        {
+            _character = character;
+        }
+        
         [HttpGet("GetAll")]
-        public ActionResult<List<Character>> Get(){
-            return Ok(characters);
+        public async Task<ActionResult<ServiceResponse<List<Character>>>> Get(){
+            return Ok( await _character.GetAllCharacters());
         } 
         [HttpGet("Get/{id}")]
-        public ActionResult<Character> GetSingle(int id){
-            return Ok(characters.FirstOrDefault(x=>x.Id == id));
-        } 
+        public async Task<ActionResult<ServiceResponse<Character>>> GetSingle(int id){
+            return Ok(await _character.GetCharacterById(id));
+        }
+        [HttpPost]
+        public async Task<ActionResult<ServiceResponse<List<Character>>>> AddCharacter(Character newCharacter){
+            return Ok(await _character.AddCharacter(newCharacter));
+        }
     }
 }
